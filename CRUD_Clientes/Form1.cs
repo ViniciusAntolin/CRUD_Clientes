@@ -10,106 +10,69 @@ namespace CRUD_Clientes
 {
     public partial class Form1 : Form
     {
-        SqlConnection connection;
-        string genero;
+        private SqlConnection connection;
         public Form1()
         {
             InitializeComponent();
 
-            Connection connections = new Connection();
-            connection = connections.TestConnection(@"server = VINICIUSPIRESPC\SQLDEV2016 ;Database = Clientes ;User Id = sa ;Password = Sync1004inova;");
+            TestConnection test = new TestConnection();
+            connection = test.Connection(@"server = VINICIUSPIRESPC\SQLDEV2016 ;Database = Clientes ;User Id = sa ;Password = Sync1004inova;");
 
-            ObterGeneros obter = new ObterGeneros();
-            List<string> listaGeneros = obter.ObterGenerosBanco(connection);
+            ObterGenerosBanco obter = new ObterGenerosBanco();
+            List<string> listaGeneros = obter.ObterGeneros(connection);
             comboBoxGenero.Items.Clear();
             comboBoxGenero.Items.AddRange(listaGeneros.ToArray());
             comboBoxGenero.SelectedIndex = 0;
-
+            textBusca.Focus();
             textCodigo.Enabled = false;
             panelAlter.Visible = false;
             btnVoltar.Visible = false;
         }
-        private async void btnExibir_Click(object sender, EventArgs e)
+
+        private void btnExibir_Click(object sender, EventArgs e)
         {
-            DataSet ds = new DataSet();
-            SqlDataAdapter da = null;
-            try
+            if (dataGridClientes.DataSource is null)
             {
-                string buscaClienteSql = "select CodigoCliente as 'Codigo do Cliente', Nome + ' ' + Sobrenome as 'Nome Completo', datediff(year, DataNascimento, getdate()) as Idade, Descricao from Clientes C " +
-                    "inner join Generos g on g.CodigoGenero = c.CodigoGenero where c.Nome + ' ' + c.Sobrenome like @Nome";
+                ExibirCliente exibir = new ExibirCliente();
+                DataSet ds = new DataSet();
 
-                using (SqlCommand command = new SqlCommand(buscaClienteSql, connection))
-                {
-                    await connection.OpenAsync();
-                    command.Parameters.AddWithValue("@Nome", "%" + textBuscaNome.Text + "%");
-                    command.CommandTimeout = 30000;
+                ds = exibir.ExibirClientes(connection, textBusca.Text, ds);
 
-                    da = new SqlDataAdapter(command);
-                }
-
-                da.Fill(ds);
                 dataGridClientes.DataSource = ds.Tables[0];
 
                 foreach (DataGridViewColumn column in dataGridClientes.Columns)
                 {
                     column.ReadOnly = true;
                 }
-
+                dataGridClientes.Focus();
             }
-            catch (SqlException sqlex)
-            {
-                ShowErrorMessage($"Erro ao buscar os clientes \n{sqlex}");
-            }
-            catch (Exception ex)
-            {
-                ShowErrorMessage($"Erro ao buscar os clientes \n{ex}");
-            }
-            finally
-            {
-                connection.Close();
-            }
-
         }
 
-        private void dataGridClientes_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-        }
-
-        private async void Consultar(string codigo)
+        private async void AtribuiTexts(string codigo)
         {
             btnVoltar.Visible = true;
 
-
             if (string.IsNullOrEmpty(codigo))
             {
-                EventArgs eventArgs = new EventArgs();
-                btnAdicionar_Click(this, eventArgs);
+                btnAdicionar.PerformClick();
                 return;
             }
 
-            label8.Text = "Alterar ou Excluir Cliente";
-
             try
             {
-                SqlDataReader reader = null;
-
-                string buscaClienteSql = "SELECT CodigoCliente, Nome, Sobrenome, CodigoGenero, DataNascimento, Endereco, Numero FROM clientes WHERE CodigoCliente = @CodigoCliente";
-
                 await connection.OpenAsync();
 
-                using (SqlCommand command = new SqlCommand(buscaClienteSql, connection))
-                {
-                    command.Parameters.AddWithValue("@CodigoCliente", Convert.ToInt64(codigo));
-                    reader = command.ExecuteReader();
-                }
+                SqlDataReader reader = null;
+                ConsultaCliente consultaCliente = new ConsultaCliente();
+                reader = await consultaCliente.Consultar(connection, codigo, reader);
 
-                while (reader.Read())
+                if (reader.Read())
                 {
                     textCodigo.Text = Convert.ToString(reader[0]);
                     textNome.Text = (string)reader[1];
                     textSobrenome.Text = (string)reader[2];
-                    comboBoxGenero.SelectedIndex = ((Byte)reader[3] == 1) ? 0 : 
-                                                    ((Byte)reader[3] == 2) ? 1 
+                    comboBoxGenero.SelectedIndex = ((Byte)reader[3] == 1) ? 0 :
+                                                    ((Byte)reader[3] == 2) ? 1
                                                     : 2;
                     dateTimePicker1.Text = Convert.ToString(reader[4]);
                     textEnd.Text = (string)reader[5];
@@ -119,30 +82,23 @@ namespace CRUD_Clientes
             }
             catch (SqlException sqlex)
             {
-                ShowErrorMessage($"Erro ao consultar o cliente \n{sqlex}");
+                ShowErrorMessage($"Erro ao exibir o cliente: \n{sqlex}");
             }
             catch (Exception ex)
             {
-                ShowErrorMessage($"Erro ao consultar o cliente \n{ex}");
+                ShowErrorMessage($"Erro ao exibir o cliente: \n{ex}");
             }
             finally
             {
                 connection.Close();
             }
+
+            label8.Text = "Alterar ou Excluir Cliente";
         }
+
         private void ShowErrorMessage(string message)
         {
             MessageBox.Show(message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-
-        private void ShowSucessMessage(string message)
-        {
-            MessageBox.Show(message, "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void ShowWarningMessage(string message)
-        {
-            MessageBox.Show(message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         private void dataGridClientes_DoubleClick(object sender, DataGridViewCellEventArgs e)
@@ -156,139 +112,69 @@ namespace CRUD_Clientes
 
                 dataGridClientes.Visible = false;
 
-                Consultar(textCodigo.Text);
-                textBuscaNome.Visible = false;
+                AtribuiTexts(textCodigo.Text);
+                textBusca.Visible = false;
                 panelAlter.Visible = true;
                 btnVoltar.Visible = true;
+                textNome.Focus();
             }
         }
-        private void panel1_Paint(object sender, PaintEventArgs e)
-        {
 
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private async void btnEditar_Click_1(object sender, EventArgs e)
+        private async void btnSalvar_Click_1(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(textCodigo.Text))
             {
-                int codigogen;
-
-                if (genero == "Masculino")
-                {
-                    codigogen = 1;
-                }
-                else
-                {
-                    codigogen = 2;
-                }
-
-                DateTime datanascimento = DateTime.Parse(dateTimePicker1.Text);
-
-                //Connection connections = new Connection();
-                //connection = connections.TestConnection(@"server = VINICIUSPIRESPC\SQLDEV2016 ;Database = PROJETO ;User Id = sa ;Password = Sync1004inova;");
-
-                Inserir inserir = new Inserir();
-                await inserir.InserirCliente(connection, textNome.Text, textSobrenome.Text, codigogen, datanascimento, textEnd.Text, textNum.Text);
+                InserirCliente inserirCliente = new InserirCliente();
+                await inserirCliente.Inserir(connection, textNome.Text, textSobrenome.Text, comboBoxGenero.ToString(), dateTimePicker1.Text, textEnd.Text, textNum.Text);
                 ResetForm();
                 return;
-                
             }
 
-            try
-            {
-                string buscaClienteSql = "UPDATE clientes set Nome = @Nome, Sobrenome = @Sobrenome, CodigoGenero = @CodigoGenero, DataNascimento = @DataNascimento," +
-                    " Endereco = @Endereco, Numero = @Numero WHERE CodigoCliente = @CodigoCliente";
+            UpdateCliente updateCliente = new UpdateCliente();
+            await updateCliente.Update(connection, textCodigo.Text, textNome.Text, textSobrenome.Text, comboBoxGenero.Text, dateTimePicker1.Text, textEnd.Text, textNum.Text);
 
-                await connection.OpenAsync();
+            AtribuiTexts(textCodigo.Text);
 
-                using (SqlCommand command = new SqlCommand(buscaClienteSql, connection))
-                {
-                    command.Parameters.AddWithValue("@CodigoCliente", textCodigo.Text);
-                    command.Parameters.AddWithValue("@Nome", textNome.Text);
-                    command.Parameters.AddWithValue("@Sobrenome", textSobrenome.Text);
-                    command.Parameters.AddWithValue("@CodigoGenero",(comboBoxGenero.SelectedItem.ToString() == "Masculino") ? 1 :
-                                                                    (comboBoxGenero.SelectedItem.ToString() == "Feminino") ? 2 :
-                                                                    3);
-                    command.Parameters.AddWithValue("@DataNascimento", DateTime.Parse(dateTimePicker1.Text));
-                    command.Parameters.AddWithValue("@Endereco", textEnd.Text);
-                    command.Parameters.AddWithValue("@Numero", Convert.ToInt32(textNum.Text));
-                    await command.ExecuteNonQueryAsync();
-                }
-
-                ShowSucessMessage($"Cliente {textNome.Text} atualizado com sucesso!");
-
-                connection.Close();
-
-                Consultar(textCodigo.Text);
-
-            }
-            catch (SqlException sqlex)
-            {
-
-                ShowErrorMessage($"Erro ao atualizar o cliente \n{sqlex.Message}");
-            }
-            catch (Exception ex)
-            {
-
-                ShowErrorMessage($"Erro ao atualizar o cliente \n{ex.Message}");
-            }
-            finally
-            {
-                ResetForm();
-                connection.Close();
-            }
-           
-        }
-        private async void btnExcluir_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(textCodigo.Text))
-            {
-                ShowWarningMessage($"Você não consultou nenhum cliente para realizar a altreção dele.");
-                return;
-            }
-
-            try
-            {
-                string buscaClienteSql = "Delete from clientes WHERE CodigoCliente = @CodigoCliente";
-
-                await connection.OpenAsync();
-
-                using (SqlCommand command = new SqlCommand(buscaClienteSql, connection))
-                {
-                    command.Parameters.AddWithValue("@CodigoCliente", textCodigo.Text);
-                    await command.ExecuteNonQueryAsync();
-                }
-
-                ShowSucessMessage($"Cliente {textNome.Text + " " + textSobrenome.Text}, excluido do Banco de dados com sucesso");
-                
-            }
-            catch (SqlException sqlex)
-            {
-
-                ShowErrorMessage($"Erro ao excluir o cliente \n{sqlex.Message}");
-            }
-            catch (Exception ex)
-            {
-
-                ShowErrorMessage($"Erro ao excluir o cliente \n{ex.Message}");
-            }
-            finally
-            {
-                connection.Close();
-            }
             ResetForm();
         }
 
+        private async void btnExcluir_Click(object sender, EventArgs e)
+        {
+
+            DeleteCliente deleteCliente = new DeleteCliente();
+            await deleteCliente.Delete(connection, textCodigo.Text, textNome.Text, textSobrenome.Text);
+
+            ResetForm();
+        }
+
+        private void dataGridClientes_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                int rowIndex = dataGridClientes.CurrentCell.RowIndex;
+                DataGridViewRow selectedRow = dataGridClientes.Rows[rowIndex];
+                string codigoCliente = selectedRow.Cells["Codigo do Cliente"].Value.ToString();
+
+                textCodigo.Text = codigoCliente;
+
+                dataGridClientes.Visible = false;
+
+                AtribuiTexts(codigoCliente);
+                textBusca.Visible = false;
+                panelAlter.Visible = true;
+                btnVoltar.Visible = true;
+                textNome.Focus();
+
+                // Impede que a tecla "Enter" continue sendo processada pela grade de dados
+                e.Handled = true;
+            }
+        }
         private void ResetForm()
         {
-            label8.Text = "Buscar Por Nome";
+            label8.Text = "Buscar Cliente";
             dataGridClientes.Visible = true;
-            textBuscaNome.Visible = true;
+            dataGridClientes.Focus();
+            textBusca.Visible = true;
             panelAlter.Visible = false;
             btnVoltar.Visible = false;
             textNome.Text = "";
@@ -297,13 +183,10 @@ namespace CRUD_Clientes
             dateTimePicker1.Text = DateTime.Now.ToString();
             textEnd.Text = "";
             textNum.Text = "";
-
-            Button button = new Button();
-            EventArgs args  = new EventArgs();
-            btnExibir_Click(button, args);
+            btnExibir.PerformClick();
         }
 
-        private void Btnvoltar_Click(object sender, EventArgs e)
+        private void BtnVoltar_Click(object sender, EventArgs e)
         {
             ResetForm();
         }
@@ -314,21 +197,74 @@ namespace CRUD_Clientes
             label8.Text = "Inserir novo cliente";
             btnVoltar.Visible = true;
             dataGridClientes.Visible = false;
-            textBuscaNome.Visible = false;
+            textBusca.Visible = false;
             panelAlter.Visible = true;
+        }
+
+        private void textBusca_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                // Simula o clique do botão btnExibir
+                btnExibir.PerformClick();
+                dataGridClientes.Focus();
+            }
         }
 
         private void comboBoxGenero_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (comboBoxGenero.SelectedIndex >= 0)
-            {
-                genero = comboBoxGenero.SelectedItem.ToString();
-            }
+
         }
 
-        private void textBuscaNome_Enter(object sender, EventArgs e)
+        private void textCodigo_TextChanged(object sender, EventArgs e)
         {
-            btnExibir_Click(sender, e);
+
         }
+
+        private void textNome_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textSobrenome_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textNum_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textEnd_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label8_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBusca_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
     }
 }

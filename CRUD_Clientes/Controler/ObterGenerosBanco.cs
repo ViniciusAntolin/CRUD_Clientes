@@ -6,21 +6,22 @@ using System.Windows.Forms;
 
 namespace CRUD_Clientes.Controler
 {
-    public class ObterGeneros
+    public class ObterGenerosBanco
     {
-        public List<string> ObterGenerosBanco(SqlConnection sqlConnection)
+        public List<string> ObterGeneros(SqlConnection sqlConnection)
         {
             List<string> listaBancos = new List<string>();
-            string buscaBanco = "SELECT Descricao FROM GENEROS";
+            string BuscaGeneroSql = "SELECT Descricao FROM GENEROS";
 
             try
             {
                 sqlConnection.Open();
 
-                using (SqlCommand command = new SqlCommand(buscaBanco, sqlConnection))
+                using (SqlCommand command = new SqlCommand(BuscaGeneroSql, sqlConnection))
                 {
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
+                        command.CommandTimeout = 30000;
                         while (reader.Read())
                         {
                             string databaseName = reader["Descricao"].ToString();

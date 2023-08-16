@@ -2,7 +2,7 @@
 	CodigoCliente BIGINT NOT NULL IDENTITY(1,1),
 	Nome VARCHAR(30),
 	Sobrenome VARCHAR(30),
-	CodigoGenero TINYINT NOT NULL CHECK (CodigoGenero IN('1', '2', '3')),
+	CodigoGenero TINYINT NOT NULL CHECK (CodigoGenero IN('1', '2', '5')),
 	DataNascimento Date NOT NULL,
 	Endereco VARCHAR(MAX),
 	Numero int

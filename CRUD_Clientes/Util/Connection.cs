@@ -1,31 +1,41 @@
 ﻿using System;
 using System.Data.SqlClient;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CRUD_Clientes.Util
 {
-    public class Connection
+    public class TestConnection
     {
-        public SqlConnection TestConnection(string ConnectionString)
+        public SqlConnection Connection(string ConnectionString)
         {
 
             SqlConnection sqlConnection = new SqlConnection(ConnectionString);
             try
             {
-                sqlConnection.OpenAsync();
+                sqlConnection.Open();
                 sqlConnection.Close();
 
                 return sqlConnection;
             }
-            catch (SqlException)
+            catch (SqlException sqlex)
             {
+                ShowErroMessage($"Erro ao conectar com o banco de dados. \n{sqlex.Message}");
                 return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                ShowErroMessage($"Erro ao conectar com o banco de dados. \n{ex.Message}");
                 return null;
             }
+            finally
+            {
+                sqlConnection.Close(); 
+            }
+        }
+
+        private void ShowErroMessage(string message)
+        {
+            MessageBox.Show(message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

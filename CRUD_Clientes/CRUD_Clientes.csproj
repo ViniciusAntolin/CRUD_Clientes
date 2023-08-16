@@ -46,9 +46,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controler\ConsultaCliente.cs" />
+    <Compile Include="Controler\DeleteCliente.cs" />
     <Compile Include="Controler\ExibirCliente.cs" />
     <Compile Include="Controler\InserirCliente.cs" />
     <Compile Include="Controler\ObterGenerosBanco.cs" />
+    <Compile Include="Controler\UpdateCliente.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

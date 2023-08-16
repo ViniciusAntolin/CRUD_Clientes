@@ -2,42 +2,60 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace CRUD_Clientes.Controler
 {
     public class ExibirCliente
     {
-        public async Task<DataSet> ExibirClientes(SqlConnection connection)
+        public DataSet ExibirClientes(SqlConnection connection, string Busca, DataSet ds)
         {
+           SqlDataAdapter da = null;
             try
             {
-                string buscaClienteSql = "SELECT Nome + ' ' + Sobrenome as NomeCompleto, DataNascimento, g.Descricao FROM clientes c\r\nINNER JOIN genero g on c.genero = g.codigogenero";
 
-                DataSet ds = new DataSet();
+                string buscaClienteSql = "select c.CodigoCliente as 'Codigo do Cliente', c.Nome + ' ' + c.Sobrenome as 'Nome Completo'" +
+                    ", datediff(year, c.DataNascimento, getdate()) as Idade, g.Descricao from Clientes C " +
+                    "inner join Generos g on g.CodigoGenero = c.CodigoGenero " +
+                    "where (c.Nome + ' ' + c.Sobrenome like @Busca OR c.CodigoCliente like @Busca)";
 
-                SqlDataAdapter da = new SqlDataAdapter(buscaClienteSql, connection);
+                using (SqlCommand command = new SqlCommand(buscaClienteSql, connection))
+                {
+                    connection.Open();
 
-                await connection.OpenAsync();
+                    if (long.TryParse(Busca, out long Codigo))
+                    {
+                        command.Parameters.AddWithValue("@Busca", Codigo);
+                    }
+                    else
+                    {
+                        command.Parameters.AddWithValue("@Busca", "%" + Busca + "%");
+                    }
+                    command.CommandTimeout = 30000;
+
+                    da = new SqlDataAdapter(command);
+                }
 
                 da.Fill(ds);
 
-                return ds;
-
             }
-            catch (SqlException)
+            catch (SqlException sqlex)
             {
-
-                throw;
+                ShowErrorMessage($"Erro ao buscar os clientes \n{sqlex}");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                ShowErrorMessage($"Erro ao buscar os clientes \n{ex}");
             }
             finally
             {
                 connection.Close();
             }
+            return ds;
+        }
+        private void ShowErrorMessage(string message)
+        {
+            MessageBox.Show(message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }
