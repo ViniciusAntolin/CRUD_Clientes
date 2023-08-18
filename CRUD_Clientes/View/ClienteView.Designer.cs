@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ClienteView));
             this.btnAdicionar = new System.Windows.Forms.Button();
             this.dataGridClientes = new System.Windows.Forms.DataGridView();
             this.btnExibir = new System.Windows.Forms.Button();
@@ -116,9 +117,9 @@
             this.label8.ForeColor = System.Drawing.Color.DodgerBlue;
             this.label8.Location = new System.Drawing.Point(83, 1);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(113, 21);
+            this.label8.Size = new System.Drawing.Size(120, 21);
             this.label8.TabIndex = 34;
-            this.label8.Text = "Buscar Cliente";
+            this.label8.Text = "Buscar Clientes";
             this.label8.Click += new System.EventHandler(this.label8_Click);
             // 
             // panelAlter
@@ -333,6 +334,7 @@
             this.Controls.Add(this.textBusca);
             this.Controls.Add(this.dataGridClientes);
             this.Controls.Add(this.panelAlter);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "ClienteView";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
