@@ -9,13 +9,13 @@ namespace CRUD_Clientes.Util
         public SqlConnection Connection(string ConnectionString)
         {
 
-            SqlConnection sqlConnection = new SqlConnection(ConnectionString);
+            SqlConnection connection = new SqlConnection(ConnectionString);
             try
             {
-                sqlConnection.Open();
-                sqlConnection.Close();
+                connection.Open();
+                connection.Close();
 
-                return sqlConnection;
+                return connection;
             }
             catch (SqlException sqlex)
             {
@@ -29,7 +29,7 @@ namespace CRUD_Clientes.Util
             }
             finally
             {
-                sqlConnection.Close(); 
+                connection.Close(); 
             }
         }
 

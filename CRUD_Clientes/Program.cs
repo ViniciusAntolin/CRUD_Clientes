@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CRUD_Clientes.Controller;
+using CRUD_Clientes.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +18,7 @@ namespace CRUD_Clientes
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new ClienteView());
         }
     }
 }
