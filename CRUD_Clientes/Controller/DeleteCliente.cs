@@ -11,8 +11,7 @@ namespace CRUD_Clientes.Controler
 {
     public class DeleteCliente
     {
-
-        public async Task Delete(SqlConnection connection, string codigo) 
+        public async Task Delete(SqlConnection connection, string codigo)
         {
             try
             {
@@ -23,18 +22,18 @@ namespace CRUD_Clientes.Controler
                 {
                     command.Parameters.AddWithValue("@CodigoCliente", codigo);
                     command.CommandTimeout = 30000;
+
+                    // Executa o comando de exclusão
                     command.ExecuteNonQuery();
                 }
 
             }
             catch (SqlException sqlex)
             {
-
                 ShowErrorMessage($"Erro ao excluir o cliente: \n{sqlex.Message}");
             }
             catch (Exception ex)
             {
-
                 ShowErrorMessage($"Erro ao excluir o cliente: \n{ex.Message}");
             }
             finally

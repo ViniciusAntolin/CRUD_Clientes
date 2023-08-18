@@ -4,6 +4,7 @@ namespace CRUD_Clientes.Model
 {
     public class ClienteModel
     {
+        // Propriedades da classe ClienteModel
         public Int64 CodigoCliente { get; set; }
         public string Nome { get; set; }
         public string Sobrenome { get; set; }
@@ -12,24 +13,26 @@ namespace CRUD_Clientes.Model
         public string Endereco { get; set; }
         public string Numero { get; set; }
 
+        // Método para validar a idade do cliente
         public bool ValidarIdade()
         {
             var resultado = CalcularIdade(DataNascimento);
             if (resultado <= 12)
             {
-                return false;
+                return false; // Retorna falso se a idade for menor ou igual a 12
             }
-            return true;
+            return true; // Retorna verdadeiro se a idade for maior que 12
         }
 
-        private int CalcularIdade(DateTime datanasicmento)
+        // Método privado para calcular a idade com base na data de nascimento
+        private int CalcularIdade(DateTime dataNascimento)
         {
-            int idade = DateTime.Now.Year - datanasicmento.Year;
-            if (DateTime.Now.DayOfYear < datanasicmento.DayOfYear)
+            int idade = DateTime.Now.Year - dataNascimento.Year;
+            if (DateTime.Now.DayOfYear < dataNascimento.DayOfYear)
             {
-                idade--;
+                idade--; // Reduz a idade se o dia do ano atual for anterior ao dia do aniversário
             }
-            return idade;
+            return idade; // Retorna a idade calculada
         }
     }
 }

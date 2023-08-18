@@ -8,7 +8,6 @@ namespace CRUD_Clientes.Controler
 {
     public class InserirCliente
     {
-
         public async Task<long> Inserir(SqlConnection connection, ClienteModel model)
         {
             string InsertSql = "INSERT INTO [dbo].[Clientes] (Nome, Sobrenome, CodigoGenero, DataNascimento, Endereco, Numero) " +
@@ -21,8 +20,10 @@ namespace CRUD_Clientes.Controler
             {
                 connection.Open();
 
+                // Cria um comando SQL para realizar a inserção
                 using (SqlCommand command = new SqlCommand(InsertSql, connection))
                 {
+                    // Definindo os parâmetros do comando SQL com os valores do modelo
                     command.Parameters.AddWithValue("@Nome", model.Nome);
                     command.Parameters.AddWithValue("@Sobrenome", model.Sobrenome);
                     command.Parameters.AddWithValue("@CodigoGenero", (model.Genero == "Masculino") ? 1 :
@@ -33,8 +34,10 @@ namespace CRUD_Clientes.Controler
                     command.Parameters.AddWithValue("@Numero", model.Numero);
                     command.CommandTimeout = 30000;
 
+                    // Executa o comando SQL e obtém o novo código do cliente
                     novoCodigoCliente = (long)await command.ExecuteScalarAsync();
                 }
+
                 MessageBox.Show($"Cliente: {model.Nome + " " + model.Sobrenome}, cadastrado com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (SqlException sqlex)
@@ -49,6 +52,8 @@ namespace CRUD_Clientes.Controler
             {
                 connection.Close();
             }
+
+            // Retorna o novo código do cliente inserido
             return novoCodigoCliente;
         }
     }

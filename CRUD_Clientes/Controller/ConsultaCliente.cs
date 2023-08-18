@@ -27,6 +27,7 @@ namespace CRUD_Clientes.Controler
                     {
                         if (await reader.ReadAsync())
                         {
+                            // Preenche o modelo do cliente com os dados obtidos da consulta
                             cliente = new ClienteModel
                             {
                                 CodigoCliente = reader.GetInt64(0),
@@ -49,8 +50,8 @@ namespace CRUD_Clientes.Controler
             {
                 ShowErrorMessage($"Erro ao consultar o cliente: \n{ex}");
             }
-            finally 
-            { 
+            finally
+            {
                 connection.Close();
             }
 
