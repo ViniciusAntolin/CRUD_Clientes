@@ -8,6 +8,7 @@ namespace CRUD_Clientes.Controler
 {
     public class ObterGenerosBanco
     {
+        // Método para obter os gêneros dos clientes a partir do banco de dados
         public List<string> ObterGeneros(SqlConnection connection)
         {
             List<string> listaBancos = new List<string>();
@@ -17,13 +18,17 @@ namespace CRUD_Clientes.Controler
             {
                 connection.Open();
 
+                // Cria um comando SQL para executar a consulta
                 using (SqlCommand command = new SqlCommand(BuscaGeneroSql, connection))
                 {
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         command.CommandTimeout = 30000;
+
+                        // Lê cada registro retornado pela consulta
                         while (reader.Read())
                         {
+                            // Obtém o valor da coluna "Descricao" e adiciona à lista
                             string databaseName = reader["Descricao"].ToString();
                             listaBancos.Add(databaseName);
                         }
@@ -32,7 +37,7 @@ namespace CRUD_Clientes.Controler
             }
             catch (SqlException ex)
             {
-                MessageBox.Show("Erro ao buscar os generos do banco: " + ex.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Erro ao buscar os gêneros do banco: " + ex.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -43,8 +48,8 @@ namespace CRUD_Clientes.Controler
                 connection.Close();
             }
 
+            // Retorna a lista de gêneros obtida do banco de dados
             return listaBancos;
-
         }
     }
 }

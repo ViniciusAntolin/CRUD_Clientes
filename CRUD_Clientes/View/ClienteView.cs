@@ -16,9 +16,12 @@ namespace CRUD_Clientes
         public event EventHandler GridDoubleClick;
         public ClienteView()
         {
+
             InitializeComponent();
 
-            _controller = new ClienteController(new ClienteModel(), this, new ConsultaCliente(), new UpdateCliente(), new InserirCliente(), new DeleteCliente(), new ExibirCliente()); ;
+            // Inicializa o controlador ClienteController e associa os eventos
+            _controller = new ClienteController(new ClienteModel(), this, new ConsultaCliente(), new UpdateCliente(), new InserirCliente(), new DeleteCliente(), new ExibirCliente());
+
             _controller.FormsAdicionar += btnAdicionar_Click;
         }
 
@@ -69,10 +72,11 @@ namespace CRUD_Clientes
         {
             return textBusca.Text;
         }
+        // Método para construir um modelo ClienteModel com base nos dados do formulário
         public ClienteModel ConstruirModel()
         {
             var model = new ClienteModel();
-            //model.CodigoCliente = Convert.ToInt64(textCodigo.Text);
+            // model.CodigoCliente = Convert.ToInt64(textCodigo.Text); // Comentado para evitar conflitos com o controlador
             model.Nome = textNome.Text;
             model.Sobrenome = textSobrenome.Text;
             model.Genero = comboBoxGenero.Text;
@@ -80,20 +84,20 @@ namespace CRUD_Clientes
             model.Endereco = textEnd.Text;
             model.Numero = textNum.Text;
             return model;
-
         }
+
+        // Método executado quando o botão "Salvar" é clicado
         private void btnSalvar_Click_1(object sender, EventArgs e)
         {
             if (!string.IsNullOrEmpty(textNome.Text))
             {
                 if (string.IsNullOrEmpty(GetCodigo()))
                 {
-
-                    _controller.btnInserir_Click(sender, e);
+                    _controller.btnInserir_Click(sender, e); // Chama o método de inserção
                     return;
                 }
 
-                _controller.btnSalvar_Click(sender, e);
+                _controller.btnSalvar_Click(sender, e); // Chama o método de atualização
 
                 ResetForm();
                 return;
@@ -102,11 +106,14 @@ namespace CRUD_Clientes
             return;
         }
 
+        // Método executado quando o botão "Excluir" é clicado
         private void btnExcluir_Click(object sender, EventArgs e)
         {
             if (!string.IsNullOrEmpty(textCodigo.Text))
             {
-                _controller.btnExcluir_Click(sender, e);
+                _controller.btnExcluir_Click(sender, e); // Chama o método de exclusão
+                ResetForm();
+                return;
             }
 
             MessageBox.Show("Não é possível excluir um cliente sem informar consultar, por favor, clique duas vezes no cliente que deseja Alterar/Excluir", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -150,11 +157,13 @@ namespace CRUD_Clientes
             btnExibir.PerformClick();
         }
 
+        // Método executado quando o botão "Voltar" é clicado
         private void BtnVoltar_Click(object sender, EventArgs e)
         {
-            ResetForm();
+            ResetForm(); // Reseta o formulário
         }
 
+        // Método executado quando o botão "Adicionar" é clicado
         private void btnAdicionar_Click(object sender, EventArgs e)
         {
             label8.ResetText();
@@ -162,7 +171,7 @@ namespace CRUD_Clientes
             textNome.Text = "";
             textSobrenome.Text = "";
             comboBoxGenero.SelectedIndex = 0;
-            dateTimePicker1.Text = DateTime.Now.ToString();
+            dateTimePicker1.Value = DateTime.Now;
             textEnd.Text = "";
             textNum.Text = "";
             label8.Text = "Inserir novo cliente";
@@ -180,6 +189,23 @@ namespace CRUD_Clientes
                 btnExibir.PerformClick();
                 dataGridClientes.Focus();
             }
+        }
+
+        // Método executado quando o formulário é carregado
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            TestConnection test = new TestConnection();
+            connection = test.Connection(@"server = VINICIUSPIRESPC\SQLDEV2016 ;Database = Clientes ;User Id = sa ;Password = Sync1004inova;");
+
+            ObterGenerosBanco obter = new ObterGenerosBanco();
+            List<string> listaGeneros = obter.ObterGeneros(connection);
+            comboBoxGenero.Items.Clear();
+            comboBoxGenero.Items.AddRange(listaGeneros.ToArray());
+            comboBoxGenero.SelectedIndex = 0;
+            textBusca.Focus();
+            textCodigo.Enabled = false;
+            panelAlter.Visible = false;
+            btnVoltar.Visible = false;
         }
 
         private void comboBoxGenero_SelectedIndexChanged(object sender, EventArgs e)
@@ -230,22 +256,6 @@ namespace CRUD_Clientes
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
 
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            TestConnection test = new TestConnection();
-            connection = test.Connection(@"server = VINICIUSPIRESPC\SQLDEV2016 ;Database = Clientes ;User Id = sa ;Password = Sync1004inova;");
-
-            ObterGenerosBanco obter = new ObterGenerosBanco();
-            List<string> listaGeneros = obter.ObterGeneros(connection);
-            comboBoxGenero.Items.Clear();
-            comboBoxGenero.Items.AddRange(listaGeneros.ToArray());
-            comboBoxGenero.SelectedIndex = 0;
-            textBusca.Focus();
-            textCodigo.Enabled = false;
-            panelAlter.Visible = false;
-            btnVoltar.Visible = false;
         }
 
     }

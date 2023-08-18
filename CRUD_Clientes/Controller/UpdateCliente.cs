@@ -8,7 +8,7 @@ namespace CRUD_Clientes.Controler
 {
     public class UpdateCliente
     {
-        public async Task Update(SqlConnection connection, ClienteModel clientenovo, string codigo)
+        public async Task Update(SqlConnection connection, ClienteModel clienteNovo, string codigo)
         {
             try
             {
@@ -19,9 +19,9 @@ namespace CRUD_Clientes.Controler
                 if (clienteAtual != null)
                 {
                     // Comparar os valores recuperados com os valores passados como parâmetros
-                    if (clientenovo.Nome != clienteAtual.Nome || clientenovo.Sobrenome != clienteAtual.Sobrenome || clientenovo.Genero != clienteAtual.Genero ||
-                        clientenovo.DataNascimento != clienteAtual.DataNascimento || clientenovo.Endereco != clienteAtual.Endereco ||
-                        clientenovo.Numero != clienteAtual.Numero)
+                    if (clienteNovo.Nome != clienteAtual.Nome || clienteNovo.Sobrenome != clienteAtual.Sobrenome || clienteNovo.Genero != clienteAtual.Genero ||
+                        clienteNovo.DataNascimento != clienteAtual.DataNascimento || clienteNovo.Endereco != clienteAtual.Endereco ||
+                        clienteNovo.Numero != clienteAtual.Numero)
                     {
                         // Pelo menos um valor é diferente, então realizar a atualização
                         string updateSql = "UPDATE clientes SET Nome = @Nome, Sobrenome = @Sobrenome, CodigoGenero = @CodigoGenero, " +
@@ -30,28 +30,26 @@ namespace CRUD_Clientes.Controler
                         using (SqlCommand updateCommand = new SqlCommand(updateSql, connection))
                         {
                             updateCommand.Parameters.AddWithValue("@CodigoCliente", codigo);
-                            updateCommand.Parameters.AddWithValue("@Nome", clientenovo.Nome);
-                            updateCommand.Parameters.AddWithValue("@Sobrenome", clientenovo.Sobrenome);
-                            updateCommand.Parameters.AddWithValue("@CodigoGenero", (clientenovo.Genero == "Masculino") ? 1 :
-                                                                                   (clientenovo.Genero == "Feminino") ? 2 :
+                            updateCommand.Parameters.AddWithValue("@Nome", clienteNovo.Nome);
+                            updateCommand.Parameters.AddWithValue("@Sobrenome", clienteNovo.Sobrenome);
+                            updateCommand.Parameters.AddWithValue("@CodigoGenero", (clienteNovo.Genero == "Masculino") ? 1 :
+                                                                                   (clienteNovo.Genero == "Feminino") ? 2 :
                                                                                    5);
-                            updateCommand.Parameters.AddWithValue("@DataNascimento", clientenovo.DataNascimento);
-                            updateCommand.Parameters.AddWithValue("@Endereco", clientenovo.Endereco);
-                            updateCommand.Parameters.AddWithValue("@Numero", clientenovo.Numero);
+                            updateCommand.Parameters.AddWithValue("@DataNascimento", clienteNovo.DataNascimento);
+                            updateCommand.Parameters.AddWithValue("@Endereco", clienteNovo.Endereco);
+                            updateCommand.Parameters.AddWithValue("@Numero", clienteNovo.Numero);
                             updateCommand.CommandTimeout = 30000;
                             updateCommand.ExecuteNonQuery();
 
-                            ShowSucessMessage($"Cliente {clientenovo.Nome + " " + clientenovo.Sobrenome} alterado com sucesso!");
+                            ShowSucessMessage($"Cliente {clienteNovo.Nome + " " + clienteNovo.Sobrenome} alterado com sucesso!");
                         }
                     }
                     else
                     {
-                        ShowWarningMessage($"Nenhuma alteração realizada para {clientenovo.Nome + " " + clientenovo.Sobrenome}, pois nenhuma informação foi alterada.");
+                        ShowWarningMessage($"Nenhuma alteração realizada para {clienteNovo.Nome + " " + clienteNovo.Sobrenome}, pois nenhuma informação foi alterada.");
                         return;
                     }
                 }
-
-                //connection.Close();
             }
             catch (SqlException sqlex)
             {

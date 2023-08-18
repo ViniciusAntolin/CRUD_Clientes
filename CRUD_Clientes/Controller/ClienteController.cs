@@ -16,6 +16,8 @@ namespace CRUD_Clientes.Controller
         private DeleteCliente _deleteCliente;
         private ExibirCliente _exibirCliente;
         public EventHandler FormsAdicionar;
+
+        // Construtor da classe ClienteController
         public ClienteController(ClienteModel cliente, ClienteView clienteView, ConsultaCliente consultaCliente, UpdateCliente updateCliente, InserirCliente inserirCliente, DeleteCliente deleteCliente, ExibirCliente exibirCliente)
         {
             _cliente = cliente;
@@ -29,6 +31,7 @@ namespace CRUD_Clientes.Controller
             _clienteView.GridDoubleClick += btnConsultar_Click;
         }
 
+        // Método para lidar com o evento de duplo clique na grade de dados
         public async void btnConsultar_Click(object sender, EventArgs e)
         {
             if (_clienteView.GetCodigo() != "")
@@ -44,6 +47,7 @@ namespace CRUD_Clientes.Controller
             FormsAdicionar?.Invoke(this, EventArgs.Empty);
         }
 
+        // Método para salvar as alterações feitas em um cliente
         public async void btnSalvar_Click(object sender, EventArgs e)
         {
             _cliente = _clienteView.ConstruirModel();
@@ -54,6 +58,7 @@ namespace CRUD_Clientes.Controller
             _clienteView.MostrarDetalhesCliente(_cliente);
         }
 
+        // Método para inserir um novo cliente no banco de dados
         public async void btnInserir_Click(object sender, EventArgs e)
         {
             _cliente = _clienteView.ConstruirModel();
@@ -68,13 +73,16 @@ namespace CRUD_Clientes.Controller
 
             MessageBox.Show("Este cliente tem menos de 13 anos ou você não está preenchendo nenhum dado, não é possível cadastrar, por favor, verifique as informações inseridas", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
+
+        // Método para excluir um cliente do banco de dados
         public async void btnExcluir_Click(object sender, EventArgs e)
         {
             string codigo = _clienteView.GetCodigo();
             await _deleteCliente.Delete(_clienteView.connection, codigo);
-            _deleteCliente.ShowSucessMessage($"Cliente {_cliente.Nome + " " + _cliente.Sobrenome}, excluido do Banco de dados com sucesso");
-
+            _deleteCliente.ShowSucessMessage($"Cliente {_cliente.Nome + " " + _cliente.Sobrenome}, excluído do Banco de dados com sucesso");
         }
+
+        // Método para exibir a lista de clientes na grade de dados
         public void btnExibir_Click(object sender, EventArgs e)
         {
             DataSet ds = new DataSet();
@@ -89,5 +97,4 @@ namespace CRUD_Clientes.Controller
             _clienteView.dataGridClientes.Focus();
         }
     }
-
 }
